@@ -31,7 +31,8 @@ ALLOWED_HOSTS = []
 # Application definition
 
 PROJECT_APPS = [
-    'results.apps.ResultsConfig'
+    'results.apps.ResultsConfig',
+    'signup.apps.SignupConfig',
 ]
 
 INSTALLED_APPS = [
@@ -43,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework_jwt',
+    'custom_user'
 ] + PROJECT_APPS
 
 MIDDLEWARE_CLASSES = [
@@ -142,3 +144,6 @@ REST_FRAMEWORK = {
       'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
     ],
 }
+
+# Override the default user model to use e-mails as usernames
+AUTH_USER_MODEL = 'custom_user.EmailUser'

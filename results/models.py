@@ -1,12 +1,13 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.conf import settings
 
-from . import views
+
+from results.utils import get_upload_path
 
 class ResultsFiles(models.Model):
-  user = models.ForeignKey(User, on_delete=models.CASCADE)
+  user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
   upload_date = models.DateTimeField(auto_now_add=True)
-  file = models.FileField(upload_to=views.get_upload_path)
+  file = models.FileField(upload_to=get_upload_path)
 
 class Results(models.Model):
   CONTEST_TYPES = (
@@ -41,7 +42,7 @@ class Results(models.Model):
       ('LOL', 'eSports'),
       ('NAS', 'Nascar'),
   )
-  user = models.ForeignKey(User, on_delete=models.CASCADE)
+  user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
   site = models.CharField(max_length=2, choices=SITES)
   sport = models.CharField(max_length=3, choices=SPORTS)
   contest_type = models.CharField(max_length=3, choices=CONTEST_TYPES)
