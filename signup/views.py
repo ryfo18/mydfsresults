@@ -1,7 +1,4 @@
-from django.contrib.auth.models import User
-from rest_framework import viewsets
-from rest_framework.views import APIView
-from rest_framework import permissions
+from rest_framework import viewsets, permissions, mixins, generics
 from signup.serializers import SignupSerializer
 from django.contrib.auth import get_user_model
 
@@ -9,20 +6,25 @@ import random
 import string
 
 # Create your views here.
-class SignupViewSet(APIView):
+class SignupViewSet(mixins.CreateModelMixin,
+                    viewsets.GenericViewSet):
   """
   API endpoint that allows users to be added
   """
   serializer_class = SignupSerializer
   permission_classes = (permissions.AllowAny,)
 
-  def perform_create(self, serializer):
+  def perform_create(self, request, *args, **kwargs):
+    serializer = SignupSerializer(data=request.data)
+    print(serializer)
     if serializer.is_valid(): #TODO add error handling
-      auth_path = "{%s_%s}.format(str(user.pk, ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(32)))"
-      u = get_user_model(email=serializer.object.username, password=auth_path, is_active=False)
+      temp_pw = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(32))
+      u = get_user_model().objects.create(email=serializer['username'], password=temp_pw, is_active=False)
       u.save()
 
-      user = get_user_model().filter(email=serializer.object.username)
-      auth = UserAuthenticate(user.pk, auth_path)
+      user = get_user_model().objects.filter(email=serializer['username'])
+      print(user)
+      auth_path = "{%s_%s}".format(str(user.id, ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(10))))
+      auth = UserAuthenticate(user.id, auth_path)
       auth.save()
       #TODO send e-mail w/ link
