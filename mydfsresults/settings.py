@@ -143,6 +143,15 @@ REST_FRAMEWORK = {
       'rest_framework.authentication.BasicAuthentication',
       'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
     ],
+    'DEFAULT_THROTTLE_CLASSES': {
+      'rest_framework.throttling.AnonRateThrottle',
+    }
+    'DEFAULT_THROTTLE_RATES': {
+      'anon': '1/second',
+      'anon': '3/minute',
+      'anon': '100/day' #TODO: re-evaluate this later
+    }
+
 }
 
 # Override the default user model to use e-mails as usernames

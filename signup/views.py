@@ -1,7 +1,9 @@
-from rest_framework import viewsets, permissions, mixins, generics
+from rest_framework import viewsets, permissions, mixins, serializers
 from signup.serializers import SignupSerializer
 from django.contrib.auth import get_user_model
+from django.db import IntegrityError
 from signup.models import UserAuthenticate
+
 
 import random
 import string
@@ -19,8 +21,11 @@ class SignupViewSet(mixins.CreateModelMixin,
     serializer = SignupSerializer(data=request.data)
     if serializer.is_valid(): #TODO add error handling
       temp_pw = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(32))
-      u = get_user_model().objects.create(email=serializer['username'], password=temp_pw, is_active=False)
-      u.save()
+      try:
+        u = get_user_model().objects.create(email=serializer['username'], password=temp_pw, is_active=False)
+        u.save()
+      except IntegrityError:
+        raise serializers.ValidationError({"username": ["E-mail address has already been registered."]}) 
 
       user = get_user_model().objects.get(email=serializer['username'])
       print(user.id)
