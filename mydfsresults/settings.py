@@ -143,13 +143,14 @@ REST_FRAMEWORK = {
       'rest_framework.authentication.BasicAuthentication',
       'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
     ],
-    'DEFAULT_THROTTLE_CLASSES': {
+    'DEFAULT_THROTTLE_CLASSES': [
       'rest_framework.throttling.AnonRateThrottle',
-    }
+      'rest_framework.throttling.ScopedRateThrottle',
+    ],
     'DEFAULT_THROTTLE_RATES': {
-      'anon': '1/second',
-      'anon': '3/minute',
-      'anon': '100/day' #TODO: re-evaluate this later
+      'anon': '100/day',
+      # custom
+      'signup': '3/minute',
     }
 
 }
