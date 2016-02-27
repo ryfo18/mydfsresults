@@ -28,10 +28,19 @@ class SignupViewSet(mixins.CreateModelMixin,
         u = get_user_model().objects.create(email=serializer.data['email'], password=temp_pw, is_active=False)
         u.save()
       except IntegrityError:
-        raise serializers.ValidationError({"email": serializer.data['email'] + " has already been registered."}) 
+        raise serializers.ValidationError({"email": serializer.data['email'] + " has already been registered."})
 
       user = get_user_model().objects.get(email=serializer.data['email'])
       auth_path = "{:s}_{:s}".format(str(user.id), ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(10)))
       auth = UserAuthenticate(user=user, auth_path=auth_path)
       auth.save()
       #TODO send e-mail w/ link
+
+class ValidateSignupViewSet(mixins.CreateModelMixin,
+                    viewsets.GenericViewSet):
+  """
+  API endpoint for signup confirmation and password change.
+  """
+  serializer_class = SignupSerializer
+  permission_classes = (permissions.AllowAny,)
+  throttle_scope = 'signup'

@@ -12,7 +12,7 @@ class SignupTests(APITestCase):
     Ensure a new account can be created.
     """
     data = {'email': 'test@test.com'}
-    response  = self.client.post('/signup/', data, format='json')
+    response  = self.client.post('/signup/create/', data, format='json')
     self.assertEqual(response.status_code, status.HTTP_201_CREATED)
     self.assertEqual(get_user_model().objects.count(), 1)
     self.assertEqual(get_user_model().objects.get().email, 'test@test.com')
@@ -22,8 +22,8 @@ class SignupTests(APITestCase):
     Ensure a duplicate account can't be created.
     """
     data = {'email': 'test@test.com'}
-    self.client.post('/signup/', data, format='json')
-    response  = self.client.post('/signup/', data, format='json')
+    self.client.post('/signup/create/', data, format='json')
+    response  = self.client.post('/signup/create/', data, format='json')
     self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
   def test_throttle(self):
@@ -33,5 +33,5 @@ class SignupTests(APITestCase):
     throttle = int(settings.REST_FRAMEWORK['DEFAULT_THROTTLE_RATES']['signup'].split('/')[0])
     for i in range(throttle + 2):
       data = {'email': 'test' + str(i) + '@test.com'}
-      response = response = self.client.post('/signup/', data, format='json')
+      response = response = self.client.post('/signup/create/', data, format='json')
     self.assertEqual(response.status_code, status.HTTP_429_TOO_MANY_REQUESTS)
