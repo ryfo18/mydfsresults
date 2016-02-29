@@ -43,8 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'rest_framework_jwt',
-    'custom_user'
+    'custom_user',
 ] + PROJECT_APPS
 
 MIDDLEWARE_CLASSES = [
@@ -91,6 +90,7 @@ DATABASES = {
 
 
 # Password validation
+# TODO: Add these restrictions to the API
 # https://docs.djangoproject.com/en/1.9/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -141,7 +141,7 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
       'rest_framework.authentication.SessionAuthentication',
       'rest_framework.authentication.BasicAuthentication',
-      'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+      'rest_framework_jwt.authentication.JSONWebTokenAuthentication'
     ],
     'DEFAULT_THROTTLE_CLASSES': [
       'rest_framework.throttling.AnonRateThrottle',
@@ -151,6 +151,7 @@ REST_FRAMEWORK = {
       'anon': '100/day',
       # custom
       'signup': '3/minute',
+      'validate_signup': '2/day',
     }
 
 }

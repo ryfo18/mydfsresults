@@ -4,14 +4,17 @@ from django.contrib.auth import get_user_model
 from django.db import IntegrityError
 from signup.models import UserAuthenticate
 from rest_framework import status
+from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework.generics import CreateAPIView
+from rest_framework_jwt.settings import api_settings
 
 import random
 import string
 
 # Create your views here.
-class SignupViewSet(mixins.CreateModelMixin,
-                    viewsets.GenericViewSet):
+class SignupViewCreate(CreateAPIView):
   """
   API endpoint that allows users to be added
   """
@@ -20,8 +23,9 @@ class SignupViewSet(mixins.CreateModelMixin,
   throttle_scope = 'signup'
 
   # POST handler
-  def perform_create(self, request, *args, **kwargs):
+  def post(self, request):
     serializer = SignupSerializer(data=request.data)
+    print(serializer)
     if serializer.is_valid(): #TODO add error handling
       temp_pw = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(32))
       try:
@@ -31,16 +35,33 @@ class SignupViewSet(mixins.CreateModelMixin,
         raise serializers.ValidationError({"email": serializer.data['email'] + " has already been registered."})
 
       user = get_user_model().objects.get(email=serializer.data['email'])
-      auth_path = "{:s}_{:s}".format(str(user.id), ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(10)))
+      auth_path = "{:s}_{:s}".format(str(user.id), ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(32)))
       auth = UserAuthenticate(user=user, auth_path=auth_path)
       auth.save()
       #TODO send e-mail w/ link
 
-class ValidateSignupViewSet(mixins.CreateModelMixin,
-                    viewsets.GenericViewSet):
+class ValidateSignupDetail(APIView):
   """
-  API endpoint for signup confirmation and password change.
+  API endpoint for signup confirmation.
   """
-  serializer_class = SignupSerializer
   permission_classes = (permissions.AllowAny,)
-  throttle_scope = 'signup'
+  renderer_classes = (JSONRenderer,)
+  # TODO Need to have a throttle on this for sure
+#  throttle_scope = 'validate-signup'
+
+  def get(self, request, auth, format=None):
+    print(auth)
+    query = UserAuthenticate.objects.filter(auth_path=auth)
+    if query.count() != 1:
+      content = {'user_validation': 'validation link not found'}
+      print('HERE')
+      return Response(content, status=status.HTTP_204_NO_CONTENT)
+    else:
+      print(query[0].user)
+      get_user_model().objects.filter(email=query[0].user).update(is_active=True)
+      user = get_user_model().objects.get(email=query[0].user)
+      query.delete()
+      jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
+      jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
+      payload = jwt_payload_handler(user)
+      return Response({'token': jwt_encode_handler(payload)})
