@@ -25,19 +25,20 @@ class SignupViewCreate(CreateAPIView):
   # POST handler
   def post(self, request):
     serializer = SignupSerializer(data=request.data)
-    print(serializer)
     if serializer.is_valid(): #TODO add error handling
       temp_pw = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(32))
       try:
         u = get_user_model().objects.create(email=serializer.data['email'], password=temp_pw, is_active=False)
         u.save()
       except IntegrityError:
-        raise serializers.ValidationError({"email": serializer.data['email'] + " has already been registered."})
+        content = {"errors": {"email": serializer.data['email'] + " has already been registered."} }
+        return Response(content, status=status.HTTP_400_BAD_REQUEST)
 
       user = get_user_model().objects.get(email=serializer.data['email'])
       auth_path = "{:s}_{:s}".format(str(user.id), ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(32)))
       auth = UserAuthenticate(user=user, auth_path=auth_path)
       auth.save()
+      return Response(serializer.data, status=status.HTTP_201_CREATED)
       #TODO send e-mail w/ link
 
 class ValidateSignupDetail(APIView):
