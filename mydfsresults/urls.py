@@ -15,8 +15,6 @@ Including another URLconf
 """
 from django.conf.urls import url, include
 from rest_framework import routers
-from results import views
-from signup.views import SignupViewSet
 from django.contrib import admin
 
 router = routers.DefaultRouter()
@@ -24,8 +22,8 @@ router = routers.DefaultRouter()
 urlpatterns = [
     url(r'^', include(router.urls)),
 #    url(r'^api/', include('rest_framework.urls', namespace='rest_framework')),
-    url(r'^signup/', include('signup.urls', namespace='signup')),
-#    url(r'^api-token-auth/', 'rest_framework_jwt.views.obtain_jwt_token'),
+    url(r'^api/signups/', include('signup.urls', namespace='signup')),
+    url(r'^api/api-token-auth/', 'rest_framework_jwt.views.obtain_jwt_token'),
 #    url(r'^api-token-refresh/', 'rest_framework_jwt.views.refresh_jwt_token'),
     url(r'^admin/', admin.site.urls),
 ]
