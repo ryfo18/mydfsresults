@@ -2,16 +2,12 @@ from rest_framework import viewsets, permissions, mixins, serializers
 from signup.serializers import SignupSerializer
 from django.contrib.auth import get_user_model
 from django.db import IntegrityError
-from signup.models import UserAuthenticate
 from rest_framework import status
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.generics import CreateAPIView
 from rest_framework_jwt.settings import api_settings
-
-import random
-import string
 
 # Create your views here.
 class SignupViewCreate(CreateAPIView):
@@ -26,20 +22,9 @@ class SignupViewCreate(CreateAPIView):
   def post(self, request):
     serializer = SignupSerializer(data=request.data)
     if serializer.is_valid(): #TODO add error handling
-      temp_pw = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(32))
-      try:
-        u = get_user_model().objects.create(email=serializer.data['email'], password=temp_pw, is_active=False)
-        u.save()
-      except IntegrityError:
-        content = {"errors": {"email": serializer.data['email'] + " has already been registered."} }
-        return Response(content, status=status.HTTP_400_BAD_REQUEST)
-
-      user = get_user_model().objects.get(email=serializer.data['email'])
-      auth_path = "{:s}_{:s}".format(str(user.id), ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(32)))
-      auth = UserAuthenticate(user=user, auth_path=auth_path)
-      auth.save()
+      serializer.save()
       return Response(serializer.data, status=status.HTTP_201_CREATED)
-      #TODO send e-mail w/ link
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class ValidateSignupDetail(APIView):
   """
