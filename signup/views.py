@@ -10,11 +10,10 @@ from rest_framework.generics import CreateAPIView
 from rest_framework_jwt.settings import api_settings
 
 # Create your views here.
-class SignupViewCreate(CreateAPIView):
+class UserCreate(CreateAPIView):
   """
   API endpoint that allows users to be added
   """
-  serializer_class = SignupSerializer
   permission_classes = (permissions.AllowAny,)
   throttle_scope = 'signup'
 

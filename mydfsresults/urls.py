@@ -22,7 +22,7 @@ router = routers.DefaultRouter()
 urlpatterns = [
     url(r'^', include(router.urls)),
 #    url(r'^api/', include('rest_framework.urls', namespace='rest_framework')),
-    url(r'^api/signups/', include('signup.urls', namespace='signup')),
+    url(r'^api/users/', include('signup.urls', namespace='signup')),
     url(r'^api/api-token-auth/', 'rest_framework_jwt.views.obtain_jwt_token'),
 #    url(r'^api-token-refresh/', 'rest_framework_jwt.views.refresh_jwt_token'),
     url(r'^admin/', admin.site.urls),
