@@ -7,6 +7,6 @@ router = DefaultRouter()
 #router.register(r'create', SignupViewSet, base_name='signup')
 
 urlpatterns = [
+  url(r'^\?auth_path=\w+/$', ValidateSignupDetail.as_view()),
   url(r'^', UserCreate.as_view()),
-  url(r'^validate/(?P<auth>\d+_\w+)/$', ValidateSignupDetail.as_view()),
 ]
