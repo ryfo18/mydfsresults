@@ -23,17 +23,22 @@ class UserCreate(APIView):
 
   def get(self, request, format=None):
     auth_path = self.request.query_params.get('auth_path', None)
-    user = self.get_object(auth_path)
-    user.user.is_active = True
-    user.user.save()
-    serializer = SignupSerializer(user.user)
-    print(serializer.data)
-    user.delete()
+    user_auth = self.get_object(auth_path)
+    user_auth.user.is_active = True
+    user_auth.user.save()
+    serializer = SignupSerializer(user_auth.user)
+    jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
+    jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
+    payload = jwt_payload_handler(user_auth.user)
+    token = jwt_encode_handler(payload)
+    print(token)
+    user_auth.delete()
     return Response(serializer.data)
 
   # POST handler
   def post(self, request):
     serializer = SignupSerializer(data=request.data)
+    print(serializer)
     if serializer.is_valid(): #TODO add error handling
       serializer.save()
       return Response(serializer.data, status=status.HTTP_201_CREATED)
