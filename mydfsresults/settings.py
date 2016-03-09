@@ -151,8 +151,8 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_THROTTLE_RATES': {
       'anon': '100/day',
-      # custom
-      'signup': '3/minute',
+      # TODO: Enable this when not testing
+      #'users': '5/hour',
       'validate_signup': '2/day',
     }
 

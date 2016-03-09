@@ -1,16 +1,18 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from signup.models import UserAuthenticate
 
-import string
-import random
 
-class SignupSerializer(serializers.Serializer):
+class SignupSerializer(serializers.ModelSerializer):
   """
   Serializer for creating a new user
   """
-  email = serializers.EmailField(required=True, allow_blank=False, max_length=255)
-  password = serializers.CharField(required=True, allow_blank=False, max_length=255, style={'input_type': 'password'})
+  is_active = serializers.BooleanField(default=False, write_only=True)
+  class Meta:
+    model = get_user_model()
+    fields = ('email', 'password', 'is_active')
+    extra_kwargs = {
+      'password': {'write_only': True}
+    }
 
   def validate_email(self, value):
     """
@@ -20,14 +22,15 @@ class SignupSerializer(serializers.Serializer):
       raise serializers.ValidationError(value + ' has already been registered.')
     return value
 
-  def save(self):
+  def create(self, validated_data):
     """
-    Save the results to the database and create a verification link
+    Return an instance of the new user that is created
     """
-    user = get_user_model().objects.create(email=self.data['email'], password=self.data['password'], is_active=False)
-    user.save()
+    return get_user_model().objects.create(**validated_data)
 
-    auth_path = "{:s}_{:s}".format(str(user.id), ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(32)))
-    auth = UserAuthenticate(user=user, auth_path=auth_path)
-    auth.save()
-    #TODO send e-mail w/ link
+class UserEmailSerializer(serializers.Serializer):
+  """
+  This is needed just to return the e-mail address of a user after they have
+  validated.
+  """
+  email = serializers.EmailField(required=True, allow_blank=False, max_length=255)
